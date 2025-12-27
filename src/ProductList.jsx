@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import "./ProductList.css";
 import CartItem from "./CartItem";
 import { addItem } from "./CartSlice";
 
 function ProductList({ onHomeClick }) {
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.cart.items);
+  
   const [showCart, setShowCart] = useState(false);
   const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
   const [addedToCart, setAddedToCart] = useState({});
@@ -271,14 +275,19 @@ function ProductList({ onHomeClick }) {
     textDecoration: "none",
   };
 
-const handleAddToCart = (product) => {
-  dispatch(addItem(product)); // Dispatch the action to add the product to the cart (Redux action)
-
-  setAddedToCart((prevState) => ({ // Update the local state to reflect that the product has been added
-    ...prevState, // Spread the previous state to retain existing entries
-    [product.name]: true, // Set the current product's name as a key with value 'true' to mark it as added
-  }));
+  const calculateTotalQuantity = () => {
+  return cartItems.reduce((total, item) => total + item.quantity, 0);
 };
+
+  
+  const handleAddToCart = (product) => {
+    dispatch(addItem(product));
+
+    setAddedToCart((prev) => ({
+      ...prev,
+      [product.name]: true,
+    }));
+  };
 
   const handleHomeClick = (e) => {
     e.preventDefault();
@@ -287,7 +296,7 @@ const handleAddToCart = (product) => {
 
   const handleCartClick = (e) => {
     e.preventDefault();
-    setShowCart(true); // Set showCart to true when cart icon is clicked
+    setShowCart(true);
   };
   const handlePlantsClick = (e) => {
     e.preventDefault();
@@ -295,10 +304,10 @@ const handleAddToCart = (product) => {
     setShowCart(false); // Hide the cart when navigating to About Us
   };
 
-  const handleContinueShopping = (e) => {
-    e.preventDefault();
+  const handleContinueShopping = () => {
     setShowCart(false);
   };
+
   return (
     <div>
       <div className="navbar" style={styleObj}>
@@ -327,6 +336,7 @@ const handleAddToCart = (product) => {
             {" "}
             <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}>
               <h1 className="cart">
+                <span className="cart-count">{calculateTotalQuantity()}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 256 256"
